@@ -1,8 +1,9 @@
+from cmath import nan
 import numpy as np
 import pickle
 import requests
 class NeuralNetwork:
-    def __init__(self,lr=0.01,hidden=5,iter=3500):
+    def __init__(self,lr=0.01,iter=11500,hidden=6):
         self.iter = iter
         self.lr =lr
         self.hidden = hidden
@@ -12,18 +13,21 @@ class NeuralNetwork:
         self.b2 =None
         
     def fit(self,x,y):
+        n_samples,n_features = x.shape
+        m,n =y.shape
         self.w1 =np.random.randn(self.hidden,len(x))*0.01
-        self.w2 =np.random.randn(1,self.hidden)*0.01
         self.b1 =np.zeros((self.hidden,1))
+        self.w2 =np.random.randn(1,self.hidden)*0.01
         self.b2 =np.zeros((1,1))
-        
+        m =y.size
         for _ in range(self.iter):
             z1 =np.dot(self.w1,x)+self.b1
-            a1 =np.tanh(z1)
+            a1 =self.hyper(z1)
             z2 =np.dot(self.w2,a1)+self.b2
-            a2=1/(1+np.exp(-z2))
-            m =y.shape[1]
-            dz2 = a2-y
+            a2= self.sigmoid(z2)
+
+
+            dz2 = a2 - y
             dw2 = (1/m)*np.dot(dz2,a1.T)
             db2 = (1/m)*np.sum(dz2,axis=1,keepdims=True)
 
@@ -34,16 +38,21 @@ class NeuralNetwork:
             self.w2 = self.w2 - (self.lr*dw2)
             self.b1 = self.b1 - (self.lr*db1)
             self.b2 = self.b2 - (self.lr*db2)
-         
-
     def predict(self,x):
         z1 =np.dot(self.w1,x)+self.b1
-        a1 =np.tanh(z1)
+        a1 = self.hyper(z1)
         z2 =np.dot(self.w2,a1)+self.b2
-        a2=1/(1+np.exp(-z2))
+        a2= self.sigmoid(z2)
+        #a2  = [1 if i>0.5 else 0 for i in a2[0]]
         return a2
+    def sigmoid(self,z):
+        return 1/(1+np.exp(-z))     
+    def hyper(self, z):
+        return 1/(1+np.exp(-z))  
     def NewRoadSpeed(self,pred):
         #pred = pred[0] if len(pred)>1 else pred
+        if pred == nan:
+            return "It's a NaN"
         ts = 120
         yhat = pred*100
         a0 = pred*yhat
@@ -59,9 +68,9 @@ class NeuralNetwork:
             values = new_var[len(new_var)-1] + cd
             new_var.append(values)
         how = ""
-        if pred <= 35:
+        if yhat <= 35:
             how = "normal"
-        elif pred <= 50:
+        elif yhat <= 50:
             how = "low"
         else:
             how = "high"
@@ -72,14 +81,18 @@ class NeuralNetwork:
         }
         return caching
 print("working")
-x  = np.random.randn(4,10)
-y = np.random.randn(1,10)
+#x  = np.random.randn(6,4)
+#y = np.random.randn(6,1)
 #model = NeuralNetwork()
+#x = x.T
+#y = y.T
+#xtest = np.random.randn(3,4).T
 #model.fit(x,y)
 #pickle.dump(model,open("model.pkl", "wb"))
-data = np.array([[1.3,2.4,1.6,1.12]]).T
+# #data = np.array([[1.3,2.4,1.6,1.12]]).T
 #model = pickle.load(open("model.pkl", "rb"))
-#a2 = model.predict(data)
+#a2 = model.predict(xtest)
+#print(a2)
 #a2 = model.NewRoadSpeed(float(a2[0]))
 
 
