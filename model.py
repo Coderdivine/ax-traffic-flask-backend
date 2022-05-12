@@ -52,7 +52,7 @@ class NeuralNetwork:
     def NewRoadSpeed(self,pred):
         #pred = pred[0] if len(pred)>1 else pred
         if pred == nan:
-            return "It's a NaN"
+            return "It's a NaN just Nan"
         ts = 120
         yhat = pred*100
         a0 = pred*yhat
