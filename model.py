@@ -1,9 +1,6 @@
-from cmath import nan
 import numpy as np
-import pickle
-import requests
 class NeuralNetwork:
-    def __init__(self,lr=0.01,iter=11500,hidden=6):
+    def __init__(self,lr=0.001,iter=100,hidden=6):
         self.iter = iter
         self.lr =lr
         self.hidden = hidden
@@ -22,25 +19,27 @@ class NeuralNetwork:
         m =y.size
         for _ in range(self.iter):
             z1 =np.dot(self.w1,x)+self.b1
-            a1 =self.hyper(z1)
+            a1 =self.sigmoid(z1)
             z2 =np.dot(self.w2,a1)+self.b2
             a2= self.sigmoid(z2)
-
-
             dz2 = a2 - y
             dw2 = (1/m)*np.dot(dz2,a1.T)
             db2 = (1/m)*np.sum(dz2,axis=1,keepdims=True)
-
-            dz1 = np.dot(self.w2.T,dz2) * (1-np.power(z1,2))
+            dz1 = np.multiply(np.dot(self.w2.T,dz2),(z1*(1-z1)))
             dw1 = (1/m)*np.dot(dz1,x.T)
             db1 = (1/m)*np.sum(dz1,axis=1,keepdims=True)
             self.w1 = self.w1 - (self.lr*dw1)
             self.w2 = self.w2 - (self.lr*dw2)
             self.b1 = self.b1 - (self.lr*db1)
             self.b2 = self.b2 - (self.lr*db2)
+    def cost(self,y,a2):
+        m =y.size
+        cost = (-1/m)*np.sum(y*np.log(a2) + (1-y)*(np.log(1-a2)))
+        return cost
+
     def predict(self,x):
         z1 =np.dot(self.w1,x)+self.b1
-        a1 = self.hyper(z1)
+        a1 =self.sigmoid(z1)
         z2 =np.dot(self.w2,a1)+self.b2
         a2= self.sigmoid(z2)
         #a2  = [1 if i>0.5 else 0 for i in a2[0]]
@@ -51,8 +50,6 @@ class NeuralNetwork:
         return 1/(1+np.exp(-z))  
     def NewRoadSpeed(self,pred):
         #pred = pred[0] if len(pred)>1 else pred
-        if pred == nan:
-            return "It's a NaN just Nan"
         ts = 120
         yhat = pred*100
         a0 = pred*yhat
@@ -62,7 +59,7 @@ class NeuralNetwork:
         eq3 = eq2*ts
         eq4  = (ts+yhat)/eq3
         eq5 = a0 - (eq4*3.9)
-        cd  = round(eq5)
+        cd  = eq5
         new_var =[cd]
         for i in range(5):
             values = new_var[len(new_var)-1] + cd
@@ -76,7 +73,7 @@ class NeuralNetwork:
             how = "high"
         caching = {
             "pred":pred,
-            "speed_limits":new_var,
+            "speedlimits":new_var,
             "how":how
         }
         return caching
