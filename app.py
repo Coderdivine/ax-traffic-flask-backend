@@ -27,20 +27,27 @@ def trainData():
     }})
 @app.route("/predict", methods=['GET','POST'])
 def predict():
-    time = request.form["time"]
-    period =  request.form["period"]
-    long = request.form["long"]
-    lat = request.form["lat"]
-    date = request.form["date"]
+    time = ""
+    period = ""
+    long =""
+    lat=""
+    date=""
+    if request.method == "POST":
+
+        time = request.form["time"]
+        period =  request.form["period"]
+        long = request.form["long"]
+        lat = request.form["lat"]
+        date = request.form["date"]
     data = np.array([{period,time,long,lat,date}])
     model = pickle.load(open("model.pkl", "rb"))
     pred = model.predict(data)
     preds = model.NewRoadSpeed(float(pred[0][0]))
     return jsonify({
-        "data":{
+        "data":[{
             "pred":pred[0][0],
             "speedlimits":preds
-        }
+        }]
     })
     
 
