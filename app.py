@@ -15,6 +15,7 @@ def trainData():
     #data = requests.get("https://ax-short.herokuapp.com/link234tools-get")
     json_data = json.loads(data.content)
     result = list(json_data)
+    #used to train predicted model for road traffic jam
     df = pd.DataFrame(json_data)
     df = df.drop(["id"], axis=1)
     x =np.array(df.iloc[:,0:5].astype(int)).T
