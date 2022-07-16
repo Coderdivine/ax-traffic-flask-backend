@@ -130,7 +130,8 @@ class NeuralNetwork:
         return 1/(1+np.exp(-z))
     def hyperbolic(self, z):
         return np.tanh(z)        
-        
+    def NewRoadSpeed(self,pred):
+        return pred**2   
 """
 X = np.array([
     [0.11,0.9,0.8,0.98],
